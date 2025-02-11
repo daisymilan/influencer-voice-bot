@@ -29,7 +29,7 @@ export function InfluencerForm() {
 
     try {
       const response = await fetch(
-        "https://n8n.servenorobot.com/webhook/manage-influencer",
+        "https://n8n.servenorobot.com/webhook/trigger-influencer-chatbot",
         {
           method: "POST",
           headers: {
