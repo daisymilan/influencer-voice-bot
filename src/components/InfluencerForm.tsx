@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { proxyRequest } from "@/services/proxyService";
 
 export function InfluencerForm() {
   const { toast } = useToast();
@@ -28,32 +29,17 @@ export function InfluencerForm() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(
-        "https://n8n.servenorobot.com/webhook/trigger-influencer-chatbot",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      );
+      const response = await proxyRequest(formData);
 
-      if (!response.ok) throw new Error("Failed to submit");
+      if (response.status !== 200) throw new Error('Failed to submit');
 
       toast({
         title: "Success!",
         description: "Your bot is being trained. We'll notify you when it's ready.",
       });
 
-      // Trigger the main workflow
-      await fetch("https://n8n.servenorobot.com/webhook/trigger-influencer-chatbot", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ influencer_id: formData.name }), // Using name as ID for now
-      });
+      // Trigger the main workflow with the same proxy
+      await proxyRequest({ influencer_id: formData.name }); // Using name as ID for now
     } catch (error) {
       console.error("Error:", error);
       toast({
