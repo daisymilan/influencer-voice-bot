@@ -259,6 +259,7 @@ export type Database = {
           chatbot_webhook_url: string | null
           created_at: string | null
           email: string
+          google_sheets_url: string | null
           id: string
           ingestion_webhook_url: string | null
           name: string
@@ -272,6 +273,7 @@ export type Database = {
           chatbot_webhook_url?: string | null
           created_at?: string | null
           email: string
+          google_sheets_url?: string | null
           id?: string
           ingestion_webhook_url?: string | null
           name: string
@@ -285,6 +287,7 @@ export type Database = {
           chatbot_webhook_url?: string | null
           created_at?: string | null
           email?: string
+          google_sheets_url?: string | null
           id?: string
           ingestion_webhook_url?: string | null
           name?: string

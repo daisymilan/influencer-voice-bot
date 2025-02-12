@@ -22,6 +22,7 @@ export function InfluencerForm() {
     twitter_handle: "",
     spotify_podcast_id: "",
     chatbot_tone: "",
+    google_sheets_url: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -108,6 +109,16 @@ export function InfluencerForm() {
               id="spotify_podcast_id"
               name="spotify_podcast_id"
               placeholder="Your Spotify podcast ID"
+              onChange={handleChange}
+              className="transition-all duration-200 focus:ring-accent"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="google_sheets_url">Google Sheets URL for Affiliate Links</Label>
+            <Input
+              id="google_sheets_url"
+              name="google_sheets_url"
+              placeholder="https://docs.google.com/spreadsheets/d/..."
               onChange={handleChange}
               className="transition-all duration-200 focus:ring-accent"
             />
