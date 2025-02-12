@@ -28,10 +28,6 @@ const Index = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-  };
-
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
@@ -44,9 +40,9 @@ const Index = () => {
             AI Assistant Training Platform
           </h1>
           <p className="text-muted-foreground max-w-2xl mx-auto animate-fadeIn">
-            Train your personal AI assistant with your content from YouTube,
-            Twitter, and Spotify. Let your followers interact with an AI that
-            speaks in your voice.
+            {showChat 
+              ? "Chat with the AI assistant trained with your content. Experience how your followers will interact with your personalized chatbot."
+              : "Train your personal AI assistant with your content from YouTube, Twitter, and Spotify. Let your followers interact with an AI that speaks in your voice."}
           </p>
           {user && (
             <div className="flex justify-end">
@@ -76,7 +72,7 @@ const Index = () => {
                 variant={showChat ? "default" : "outline"}
                 className="bg-accent hover:bg-accent-light transition-colors duration-200"
               >
-                Chat Demo
+                Try Chat Demo
               </Button>
             </div>
             <div className="animate-fadeIn">
