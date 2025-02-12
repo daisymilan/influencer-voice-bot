@@ -1,20 +1,51 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
 }
 
+interface AffiliateLink {
+  product_name: string;
+  affiliate_link: string;
+}
+
 export function ChatInterface() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [affiliateLinks, setAffiliateLinks] = useState<AffiliateLink[]>([]);
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Fetch affiliate links when component mounts
+    const fetchAffiliateLinks = async () => {
+      const { data, error } = await supabase
+        .from('affiliate_links')
+        .select('product_name, affiliate_link');
+
+      if (error) {
+        console.error('Error fetching affiliate links:', error);
+        return;
+      }
+
+      setAffiliateLinks(data || []);
+    };
+
+    fetchAffiliateLinks();
+  }, []);
+
+  const findRelevantAffiliateLinks = (message: string): AffiliateLink[] => {
+    return affiliateLinks.filter(link => 
+      message.toLowerCase().includes(link.product_name.toLowerCase())
+    );
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +66,6 @@ export function ChatInterface() {
           },
           body: JSON.stringify({
             message: input,
-            // Add any other required parameters here
           }),
         }
       );
@@ -43,9 +73,20 @@ export function ChatInterface() {
       if (!response.ok) throw new Error("Failed to get response");
 
       const data = await response.json();
+      const botResponse = data.response;
+      
+      // Check for relevant affiliate links
+      const relevantLinks = findRelevantAffiliateLinks(botResponse);
+      
+      let finalResponse = botResponse;
+      if (relevantLinks.length > 0) {
+        finalResponse += "\n\nRelevant product links:\n" + 
+          relevantLinks.map(link => `- ${link.product_name}: ${link.affiliate_link}`).join('\n');
+      }
+
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: data.response },
+        { role: "assistant", content: finalResponse },
       ]);
     } catch (error) {
       console.error("Error:", error);
@@ -77,7 +118,9 @@ export function ChatInterface() {
                     : "bg-muted text-primary"
                 }`}
               >
-                {message.content}
+                {message.content.split('\n').map((line, i) => (
+                  <p key={i}>{line}</p>
+                ))}
               </div>
             </div>
           ))}
