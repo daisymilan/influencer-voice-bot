@@ -1,6 +1,6 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
-import { google } from 'https://deno.land/x/google_auth@v0.8.0/mod.ts';
+import { OAuth2Client } from 'https://deno.land/x/google_auth@v0.4.0/mod.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -48,29 +48,29 @@ Deno.serve(async (req) => {
       throw new Error('Missing Google OAuth credentials')
     }
 
-    const oauth2Client = new google.auth.OAuth2(
+    const oauth2Client = new OAuth2Client({
       clientId,
       clientSecret,
-      'https://developers.google.com/oauthplayground' // Temporary redirect URI for testing
-    );
+      redirectUri: 'https://developers.google.com/oauthplayground'
+    });
 
-    // For now, we'll use service account authentication since it's simpler for backend usage
+    // For now, we'll use direct API access
     // You would need to set up proper OAuth flow for user authentication in a production environment
-    oauth2Client.setCredentials({
-      access_token: 'placeholder', // This will be replaced by proper OAuth flow
-      refresh_token: 'placeholder' // This will be replaced by proper OAuth flow
+    const sheetsApiEndpoint = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/A2:B`;
+    
+    const response = await fetch(sheetsApiEndpoint, {
+      headers: {
+        'Authorization': `Bearer ${oauth2Client.accessToken}`,
+        'Accept': 'application/json',
+      },
     });
 
-    // Initialize Google Sheets API
-    const sheets = google.sheets({ version: 'v4', auth: oauth2Client });
+    if (!response.ok) {
+      throw new Error(`Failed to fetch Google Sheets data: ${response.statusText}`);
+    }
 
-    // Fetch data from Google Sheets
-    const response = await sheets.spreadsheets.values.get({
-      spreadsheetId,
-      range: 'A2:B', // Assuming headers are in row 1
-    });
-
-    const rows = response.data.values || [];
+    const data = await response.json();
+    const rows = data.values || [];
 
     // Delete existing affiliate links for this influencer
     await supabase
